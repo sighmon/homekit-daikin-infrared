@@ -15,6 +15,12 @@ An Apple HomeKit accessory for an infrared Daikin FTXS50KAVMA reverse cycle air 
 | `11` GPIO17 | `s` |
 | `17` 3.3V | `middle` |
 
+| Raspberry Pi pin | Infrared transmitter pin |
+| - | - |
+| `14` Ground | `-` |
+| `12` GPIO18 | `s` |
+| `01` 3.3V | `middle` |
+
 ## Software
 
 * Install `LIRC`: `sudo apt install lirc`
@@ -30,6 +36,11 @@ You can also set this as a default by editing `/etc/lirc/lirc_options.conf`
 driver = default
 device = /dev/lirc0
 ```
+
+If you install both the decoder and transmitter, the devices will appear:
+
+* Transmitter: `/dev/lirc0`
+* Decoder: `/dev/lirc1`
 
 ## Decoding Daikin IR codes
 
@@ -97,6 +108,14 @@ Here are the hex codes from the binary strings `decode.py` output:
 
 The lengths seem to match these [reversed Daikin codes for a `ARC470A1` remote](https://github.com/blafois/Daikin-IR-Reverse#protocol-documentation).
 
+## Sending IR codes
+
+There's a sample LIRC config file: [/codes/daikin.lircd.conf](/codes/daikin.lircd.conf)
+
+* Copy it to the right location: `sudo cp daikin.lircd.conf /etc/lirc/lircd.conf.d/`
+* Restart LIRCd: `sudo systemctl restart lircd`
+* Send your command: `irsend SEND_ONCE daikin POWER_ON`
+
 ## TODO
 
 - [x] Decode IR codes for all of the functions we'd like to use
@@ -107,6 +126,7 @@ The lengths seem to match these [reversed Daikin codes for a `ARC470A1` remote](
 ## Useful links
 
 * Daikin IR protocol: https://github.com/blafois/Daikin-IR-Reverse
+* Daikin Pi: https://github.com/dannyshaw/daikin-pi
 * IR transmitter: https://core-electronics.com.au/digital-ir-transmitter-module-arduino-compatible.html
 * HAP Go library: https://github.com/brutella/hap
 * Go client for LIRC (Linux Infrared Remote Control): https://github.com/chbmuc/lirc
