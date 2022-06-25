@@ -4,16 +4,16 @@ An Apple HomeKit accessory for an infrared Daikin FTXS50KAVMA reverse cycle air 
 
 ## Hardware
 
-* Duinotech infrared receiver XC-4427
-* Duinotech infrared transmitter XC-4426
+* Duinotech infrared receiver XC-4427 ([Jaycar](https://www.jaycar.com.au/arduino-compatible-infrared-receiver-module/p/XC4427))
+* Duinotech infrared transmitter XC-4426 ([Jaycar](https://www.jaycar.com.au/arduino-compatible-infrared-transmitter-module/p/XC4426))
 
 ### Wiring
 
 | Raspberry Pi pin | Infrared receiver pin |
 | - | - |
-| 9 - Ground | `-` pin |
-| 11 - GPIO17 | `s` pin |
-| 17 - 3.3V DC | middle pin |
+| `9` Ground | `-` |
+| `11` GPIO17 | `s` |
+| `17` 3.3V | `middle` |
 
 ## Software
 
@@ -26,6 +26,7 @@ If pressing your remote doesn't output anything, try: `mode2 --driver default`
 You can also set this as a default by editing `/etc/lirc/lirc_options.conf`
 
 ```conf
+# /etc/lirc/lirc_options.conf
 driver = default
 device = /dev/lirc0
 ```
