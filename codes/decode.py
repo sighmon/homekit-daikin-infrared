@@ -24,7 +24,13 @@ def parse(input_string):
     # A = start of line
     # B = end of line
     # E = end of command
-    tuple_to_binary = {(0,0):"0",(0,1):"1",(2,2):"A",(0,3):"B",(0,2):"E"}
+    tuple_to_binary = {
+        (0, 0): "0",
+        (0, 1): "1",
+        (2, 2): "A",
+        (0, 3): "B",
+        (0, 2): "E",
+    }
     list_of_tuples = list(map(lambda x: int(x[6:]), input_string.split("\n")))
     binary_values = []
 
@@ -41,6 +47,7 @@ def parse(input_string):
     binary_string = "".join(binary_values)
 
     return binary_string
+
 
 with open(filename, "r") as file:
     # Remove the last two newline characters
