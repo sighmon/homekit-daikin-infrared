@@ -59,36 +59,36 @@ Where:
 
 Here are the hex codes from the binary strings `decode.py` output:
 
-**Power on**
-
 ```hex
+# Power on
+
 00 00
 88 5B E4 00 A3 00 00 EB
 88 5B E4 00 42 09 DC F8
 11 0B 7C 80 00 12 49 80 00 A0 00 0C 00 C0 00 10 60 00 05
 ```
 
-**Power off**
-
 ```hex
+# Power off
+
 00 00
 88 5B E4 00 A3 00 00 EB
 88 5B E4 00 42 A9 DC 24
 11 0B 7C 80 00 02 49 80 00 A0 00 0C 00 C0 00 10 60 00 19
 ```
 
-**Temperature up**
-
 ```hex
+# Temperature up
+
 00 00
 88 5B E4 00 A3 00 00 EB
 88 5B E4 00 42 E9 DC 64
 11 0B 7C 80 00 02 45 80 00 A0 00 0C 00 C0 00 10 60 00 15
 ```
 
-**Temperature down**
-
 ```hex
+# Temperature down
+
 00 00
 88 5B E4 00 A3 00 00 EB
 88 5B E4 00 42 19 DC E4
