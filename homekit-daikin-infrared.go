@@ -40,7 +40,17 @@ func main() {
 	})
 
 	a.Heater.HeatingThresholdTemperature.OnValueRemoteUpdate(func(value float64) {
-		log.Println(fmt.Sprintf("Target temperature: %f°C", value))
+		log.Println(fmt.Sprintf("TODO: send target temperature command: %f°C", value))
+	})
+
+	a.Heater.TargetHeaterCoolerState.OnValueRemoteUpdate(func(value int) {
+		if value == 0 {
+			log.Println("TODO: send target state command: Auto")
+		} else if value == 1 {
+			log.Println("TODO: send target state command: Heat")
+		} else {
+			log.Println("TODO: send target state command: Cool")
+		}
 	})
 
 	// Store the data in the "./db" directory.
