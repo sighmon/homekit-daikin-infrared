@@ -24,6 +24,13 @@ An Apple HomeKit accessory for an infrared Daikin FTXS50KAVMA reverse cycle air 
 ## Software
 
 * Install `LIRC`: `sudo apt install lirc`
+* Copy the Daikin configuration codes file: `sudo cp codes/daikin.lircd.conf /etc/lirc/lircd.conf.d/`
+* Restart LIRCd: `sudo systemctl restart lircd`
+* Build the HomeKit executable: `go build homekit-daikin-infrared.go`
+* Run the executable: `./homekit-daikin-infrared` or run the go file directly `go run homekit-daikin-infrared.go`
+* In the Home app on your iOS device, add a new accessory with the code: `00102003`
+
+### LIRC
 
 To detect IR codes, run: `mode2`
 
@@ -65,6 +72,12 @@ Where:
 * `A` = start of line
 * `B` = end of line
 * `E` = end of command
+
+If you'd like to create a remote control codes file `*.lircd.conf` of your own, here are some instructions:
+
+* Run mode2 with column display mode on: `mode2 --driver default -d /dev/lirc1 -m`
+* Remove the end of line/start of line/end of command output (including the last pulse)
+* Copy it inbetween `begin raw_codes` and `end raw_codes` with a header `name YOUR_COMMAND_NAME`
 
 ### Daikin FTXS50KAVMA IR codes
 
@@ -111,6 +124,12 @@ The lengths seem to match these [reversed Daikin codes for a `ARC470A1` remote](
 ## Sending IR codes
 
 There's a sample LIRC config file: [/codes/daikin.lircd.conf](/codes/daikin.lircd.conf)
+
+The `POWER_ON` command sets the heating/cooling mode `auto`, fan mode `auto`, temperature `23`.
+
+There are individual temperature commands also with the mode `auto`, fan mode `auto`, e.g. `TEMPERATURE_AUTO_18`
+
+This avoids having to deal with generating a dynamic `.conf` file for now.
 
 * Copy it to the right location: `sudo cp daikin.lircd.conf /etc/lirc/lircd.conf.d/`
 * Restart LIRCd: `sudo systemctl restart lircd`

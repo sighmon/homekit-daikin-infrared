@@ -30,6 +30,9 @@ func main() {
 
 	// Set target temperature
 	a.Heater.HeatingThresholdTemperature.SetValue(23)
+	a.Heater.HeatingThresholdTemperature.SetStepValue(1.0)
+	a.Heater.HeatingThresholdTemperature.SetMinValue(18)
+	a.Heater.HeatingThresholdTemperature.SetMaxValue(26)
 
 	a.Heater.Active.OnValueRemoteUpdate(func(on int) {
 		if on == 1 {
