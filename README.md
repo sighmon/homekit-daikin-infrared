@@ -116,15 +116,22 @@ There's a sample LIRC config file: [/codes/daikin.lircd.conf](/codes/daikin.lirc
 * Restart LIRCd: `sudo systemctl restart lircd`
 * Send your command: `irsend SEND_ONCE daikin POWER_ON`
 
+Sending also works via the Go LIRC client: [/infrared-send/infrared-send.go](/infrared-send/infrared-send.go)
+
+* Modify your command in: `infrared-send.go`
+* Send it: `go run infrared-send.go`
+
 ## TODO
 
 - [x] Decode IR codes for all of the functions we'd like to use
-- [ ] Send those IR codes using the Go LIRC client
+- [x] Send those IR codes using the Go LIRC client
 - [ ] Setup HAP Go library to send IR codes
 - [ ] Setup GAP Go library to receive air conditioner commands
 
 ## Useful links
 
+* Daikin remote: https://github.com/mharizanov/Daikin-AC-remote-control-over-the-Internet
+* Arduino IRremote including Daikin: https://github.com/crankyoldgit/IRremoteESP8266
 * Daikin IR protocol: https://github.com/blafois/Daikin-IR-Reverse
 * Daikin Pi: https://github.com/dannyshaw/daikin-pi
 * IR transmitter: https://core-electronics.com.au/digital-ir-transmitter-module-arduino-compatible.html
