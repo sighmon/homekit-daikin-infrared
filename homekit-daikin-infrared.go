@@ -77,12 +77,11 @@ func main() {
 
 	a.Heater.HeatingThresholdTemperature.OnValueRemoteUpdate(func(value float64) {
 		currentHeatingThresholdTemperature = value
-		log.Println(fmt.Sprintf("Sending target temperature command: %f°C", value))
-		log.Println(fmt.Sprintf("Target state: %d", currentHeaterCoolerState))
 		state := "AUTO"
 		if currentHeaterCoolerState == 1 {
 			state = "HEAT"
 		}
+		log.Println(fmt.Sprintf("Sending target temperature command: %f°C %s", value, state))
 		err = ir.Send(fmt.Sprintf("daikin TEMPERATURE_%s_%d", state, int(value)))
 		if err != nil {
 			log.Println(err)
