@@ -21,6 +21,9 @@ func main() {
 		Firmware: "1.0.0",
 	})
 
+	// TODO: read from temperature sensor
+	a.Heater.CurrentTemperature.SetValue(19)
+
 	a.Heater.Active.OnValueRemoteUpdate(func(on int) {
 		if on == 1 {
 			log.Println("TODO: send on command")
