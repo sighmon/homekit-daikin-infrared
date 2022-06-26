@@ -24,6 +24,8 @@ func main() {
 	// TODO: read from temperature sensor
 	a.Heater.CurrentTemperature.SetValue(19)
 
+	a.Heater.TargetHeaterCoolerState.SetValue(23)
+
 	a.Heater.Active.OnValueRemoteUpdate(func(on int) {
 		if on == 1 {
 			log.Println("TODO: send on command")
