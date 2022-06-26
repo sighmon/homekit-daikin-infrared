@@ -5,6 +5,7 @@ import (
 	"github.com/brutella/hap/accessory"
 
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -24,7 +25,11 @@ func main() {
 	// TODO: read from temperature sensor
 	a.Heater.CurrentTemperature.SetValue(19)
 
-	a.Heater.TargetHeaterCoolerState.SetValue(23)
+	// Set target state to auto
+	a.Heater.TargetHeaterCoolerState.SetValue(0)
+
+	// Set target temperature
+	a.Heater.HeatingThresholdTemperature.SetValue(23)
 
 	a.Heater.Active.OnValueRemoteUpdate(func(on int) {
 		if on == 1 {
@@ -32,6 +37,10 @@ func main() {
 		} else {
 			log.Println("TODO: send off command")
 		}
+	})
+
+	a.Heater.HeatingThresholdTemperature.OnValueRemoteUpdate(func(value float64) {
+		log.Println(fmt.Sprintf("Target temperature: %f°C", value))
 	})
 
 	// Store the data in the "./db" directory.
