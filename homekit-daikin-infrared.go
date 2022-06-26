@@ -81,8 +81,8 @@ func main() {
 		if currentHeaterCoolerState == 1 {
 			state = "HEAT"
 		}
-		log.Println(fmt.Sprintf("Sending target temperature command: %f°C %s", value, state))
-		err = ir.Send(fmt.Sprintf("daikin TEMPERATURE_%s_%d", state, int(value)))
+		log.Println(fmt.Sprintf("Sending target temperature command: %f°C %s", currentHeatingThresholdTemperature, state))
+		err = ir.Send(fmt.Sprintf("daikin TEMPERATURE_%s_%d", state, int(currentHeatingThresholdTemperature)))
 		if err != nil {
 			log.Println(err)
 		}
@@ -90,20 +90,14 @@ func main() {
 
 	a.Heater.TargetHeaterCoolerState.OnValueRemoteUpdate(func(value int) {
 		currentHeaterCoolerState = value
-		if value == 0 {
-			log.Println("Sending target state command: Auto")
-			err = ir.Send("daikin MODE_AUTO")
-			if err != nil {
-				log.Println(err)
-			}
-		} else if value == 1 {
-			log.Println("Sending target state command: Heat")
-			err = ir.Send("daikin MODE_HEAT")
-			if err != nil {
-				log.Println(err)
-			}
-		} else {
-			log.Println("Target state command: Unknown")
+		state := "AUTO"
+		if currentHeaterCoolerState == 1 {
+			state = "HEAT"
+		}
+		log.Println(fmt.Sprintf("Sending target mode command: %f°C %s", currentHeatingThresholdTemperature, state))
+		err = ir.Send(fmt.Sprintf("daikin TEMPERATURE_%s_%d", state, int(currentHeatingThresholdTemperature)))
+		if err != nil {
+			log.Println(err)
 		}
 	})
 
