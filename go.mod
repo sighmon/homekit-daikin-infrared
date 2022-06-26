@@ -6,6 +6,7 @@ require github.com/brutella/hap v0.0.15
 
 require (
 	github.com/brutella/dnssd v1.2.1 // indirect
+	github.com/chbmuc/lirc v0.0.0-20150702183631-f5796a80dd2b // indirect
 	github.com/go-chi/chi v1.5.4 // indirect
 	github.com/miekg/dns v1.1.1 // indirect
 	github.com/tadglines/go-pkgs v0.0.0-20210623144937-b983b20f54f9 // indirect
