@@ -17,3 +17,5 @@
 # HomeKit accessory database
 db
 
+# Sublime
+*.sublime-*
