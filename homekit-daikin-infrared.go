@@ -16,6 +16,7 @@ import (
 
 var developmentMode bool
 var currentHeaterCoolerState int
+var currentHeatingThresholdTemperature float64
 
 func init() {
 	flag.BoolVar(&developmentMode, "dev", false, "development mode, so ignore LIRC setup")
@@ -38,7 +39,7 @@ func main() {
 		Firmware: "1.0.0",
 	})
 
-	// TODO: read from temperature sensor
+	// TODO: read room temperature from a sensor
 	a.Heater.CurrentTemperature.SetValue(19)
 
 	// Set target state to auto
@@ -46,7 +47,8 @@ func main() {
 	a.Heater.TargetHeaterCoolerState.SetValue(currentHeaterCoolerState)
 
 	// Set target temperature
-	a.Heater.HeatingThresholdTemperature.SetValue(23)
+	currentHeatingThresholdTemperature = 23.0
+	a.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
 	a.Heater.HeatingThresholdTemperature.SetStepValue(1.0)
 	a.Heater.HeatingThresholdTemperature.SetMinValue(18)
 	a.Heater.HeatingThresholdTemperature.SetMaxValue(26)
@@ -57,6 +59,8 @@ func main() {
 			powerOnCommand := "daikin POWER_ON"
 			if currentHeaterCoolerState == 1 {
 				powerOnCommand = "daikin POWER_ON_HEAT"
+				currentHeatingThresholdTemperature = 25.0
+				a.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
 			}
 			err = ir.Send(powerOnCommand)
 			if err != nil {
@@ -72,6 +76,7 @@ func main() {
 	})
 
 	a.Heater.HeatingThresholdTemperature.OnValueRemoteUpdate(func(value float64) {
+		currentHeatingThresholdTemperature = value
 		log.Println(fmt.Sprintf("Sending target temperature command: %f°C", value))
 		log.Println(fmt.Sprintf("Target state: %d", currentHeaterCoolerState))
 		state := "AUTO"
