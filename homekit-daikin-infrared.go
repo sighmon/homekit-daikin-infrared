@@ -15,6 +15,7 @@ import (
 )
 
 var developmentMode bool
+var currentHeaterCoolerState int
 
 func init() {
 	flag.BoolVar(&developmentMode, "dev", false, "development mode, so ignore LIRC setup")
@@ -41,7 +42,8 @@ func main() {
 	a.Heater.CurrentTemperature.SetValue(19)
 
 	// Set target state to auto
-	a.Heater.TargetHeaterCoolerState.SetValue(0)
+	currentHeaterCoolerState = 0
+	a.Heater.TargetHeaterCoolerState.SetValue(currentHeaterCoolerState)
 
 	// Set target temperature
 	a.Heater.HeatingThresholdTemperature.SetValue(23)
@@ -51,13 +53,13 @@ func main() {
 
 	a.Heater.Active.OnValueRemoteUpdate(func(on int) {
 		if on == 1 {
-			log.Println("Sending on command")
+			log.Println("Sending power on command")
 			err = ir.Send("daikin POWER_ON")
 			if err != nil {
 				log.Println(err)
 			}
 		} else {
-			log.Println("TODO: send off command")
+			log.Println("Sending power off command")
 			err = ir.Send("daikin POWER_OFF")
 			if err != nil {
 				log.Println(err)
@@ -66,11 +68,20 @@ func main() {
 	})
 
 	a.Heater.HeatingThresholdTemperature.OnValueRemoteUpdate(func(value float64) {
-		log.Println(fmt.Sprintf("TODO: send target temperature command: %f°C", value))
-		log.Println(fmt.Sprintf("Target state: %f", a.Heater.TargetHeaterCoolerState))
+		log.Println(fmt.Sprintf("Sending target temperature command: %f°C", value))
+		log.Println(fmt.Sprintf("Target state: %d", currentHeaterCoolerState))
+		state := "AUTO"
+		if currentHeaterCoolerState == 1 {
+			state = "HEAT"
+		}
+		err = ir.Send(fmt.Sprintf("daikin TEMPERATURE_%s_%d", state, int(value)))
+		if err != nil {
+			log.Println(err)
+		}
 	})
 
 	a.Heater.TargetHeaterCoolerState.OnValueRemoteUpdate(func(value int) {
+		currentHeaterCoolerState = value
 		if value == 0 {
 			log.Println("Sending target state command: Auto")
 			err = ir.Send("daikin MODE_AUTO")
@@ -84,7 +95,7 @@ func main() {
 				log.Println(err)
 			}
 		} else {
-			log.Println("TODO: target state command: Unknown")
+			log.Println("Target state command: Unknown")
 		}
 	})
 
