@@ -2,6 +2,8 @@
 
 An Apple HomeKit accessory for an infrared Daikin FTXS50KAVMA reverse cycle air conditioner remote control.
 
+![The accessory added to iOS](images/homekit-daikin-infrared.jpg)
+
 ## Hardware
 
 * Duinotech infrared receiver XC-4427 ([Jaycar](https://www.jaycar.com.au/arduino-compatible-infrared-receiver-module/p/XC4427))
@@ -144,7 +146,8 @@ Sending also works via the Go LIRC client: [/infrared-send/infrared-send.go](/in
 
 - [x] Decode IR codes for all of the functions we'd like to use
 - [x] Send those IR codes using the Go LIRC client
-- [ ] Setup HAP Go library to send IR codes
+- [x] Setup HAP Go library to send IR codes
+- [ ] Write Go class to programmatically create and send IR codes
 - [ ] Setup GAP Go library to receive air conditioner commands
 
 ## Useful links
