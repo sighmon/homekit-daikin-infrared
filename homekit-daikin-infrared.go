@@ -54,7 +54,11 @@ func main() {
 	a.Heater.Active.OnValueRemoteUpdate(func(on int) {
 		if on == 1 {
 			log.Println("Sending power on command")
-			err = ir.Send("daikin POWER_ON")
+			powerOnCommand := "daikin POWER_ON"
+			if currentHeaterCoolerState == 1 {
+				powerOnCommand = "daikin POWER_ON_HEAT"
+			}
+			err = ir.Send(powerOnCommand)
 			if err != nil {
 				log.Println(err)
 			}
