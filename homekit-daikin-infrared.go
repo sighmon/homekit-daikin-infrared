@@ -4,6 +4,7 @@ import (
 	"github.com/brutella/hap"
 	"github.com/brutella/hap/accessory"
 	"github.com/chbmuc/lirc"
+	"github.com/d2r2/go-dht"
 
 	"context"
 	"flag"
@@ -12,15 +13,33 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
-var developmentMode bool
+var acc *accessory.Heater
 var currentHeaterCoolerState int
 var currentHeatingThresholdTemperature float64
+var developmentMode bool
+var temperaturePin int
 
 func init() {
 	flag.BoolVar(&developmentMode, "dev", false, "development mode, so ignore LIRC setup")
+	flag.IntVar(&temperaturePin, "temperaturePin", 0, "tempearture sensor GPIO pin, an int")
 	flag.Parse()
+}
+
+func readTemperature() {
+	if temperaturePin != 0 {
+		for {
+			temperature, humidity, retried, err := dht.ReadDHTxxWithRetry(dht.DHT22, temperaturePin, false, 10)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(fmt.Sprintf("Temperature = %f°C, Humidity = %f% (retried %d times)", temperature, humidity, retried))
+			acc.Heater.CurrentTemperature.SetValue(float64(temperature))
+			time.Sleep(5 * time.Second)
+		}
+	}
 }
 
 func main() {
@@ -31,7 +50,7 @@ func main() {
 	}
 
 	// Create the Daikin heater accessory.
-	a := accessory.NewHeater(accessory.Info {
+	acc = accessory.NewHeater(accessory.Info {
 		Name: "Daikin air conditioner",
 		SerialNumber: "FTXS50KAVMA",
 		Manufacturer: "Daikin",
@@ -39,28 +58,25 @@ func main() {
 		Firmware: "1.0.0",
 	})
 
-	// TODO: read room temperature from a sensor
-	a.Heater.CurrentTemperature.SetValue(19)
-
 	// Set target state to auto
 	currentHeaterCoolerState = 0
-	a.Heater.TargetHeaterCoolerState.SetValue(currentHeaterCoolerState)
+	acc.Heater.TargetHeaterCoolerState.SetValue(currentHeaterCoolerState)
 
 	// Set target temperature
 	currentHeatingThresholdTemperature = 23.0
-	a.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
-	a.Heater.HeatingThresholdTemperature.SetStepValue(1.0)
-	a.Heater.HeatingThresholdTemperature.SetMinValue(18)
-	a.Heater.HeatingThresholdTemperature.SetMaxValue(26)
+	acc.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
+	acc.Heater.HeatingThresholdTemperature.SetStepValue(1.0)
+	acc.Heater.HeatingThresholdTemperature.SetMinValue(18)
+	acc.Heater.HeatingThresholdTemperature.SetMaxValue(26)
 
-	a.Heater.Active.OnValueRemoteUpdate(func(on int) {
+	acc.Heater.Active.OnValueRemoteUpdate(func(on int) {
 		if on == 1 {
 			log.Println("Sending power on command")
 			powerOnCommand := "daikin POWER_ON"
 			if currentHeaterCoolerState == 1 {
 				powerOnCommand = "daikin POWER_ON_HEAT"
 				currentHeatingThresholdTemperature = 25.0
-				a.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
+				acc.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
 			}
 			err = ir.Send(powerOnCommand)
 			if err != nil {
@@ -75,7 +91,7 @@ func main() {
 		}
 	})
 
-	a.Heater.HeatingThresholdTemperature.OnValueRemoteUpdate(func(value float64) {
+	acc.Heater.HeatingThresholdTemperature.OnValueRemoteUpdate(func(value float64) {
 		currentHeatingThresholdTemperature = value
 		state := "AUTO"
 		if currentHeaterCoolerState == 1 {
@@ -88,7 +104,7 @@ func main() {
 		}
 	})
 
-	a.Heater.TargetHeaterCoolerState.OnValueRemoteUpdate(func(value int) {
+	acc.Heater.TargetHeaterCoolerState.OnValueRemoteUpdate(func(value int) {
 		currentHeaterCoolerState = value
 		state := "AUTO"
 		if currentHeaterCoolerState == 1 {
@@ -105,7 +121,7 @@ func main() {
 	fs := hap.NewFsStore("./db")
 
 	// Create the hap server.
-	server, err := hap.NewServer(fs, a.A)
+	server, err := hap.NewServer(fs, acc.A)
 	if err != nil {
 		// stop if an error happens
 		log.Panic(err)
@@ -126,6 +142,10 @@ func main() {
 		// Cancel the context to stop the server.
 		cancel()
 	}()
+
+	// Read room temperature from a DHT22 temperature sensor
+	acc.Heater.CurrentTemperature.SetValue(19)
+	go readTemperature()
 
 	// Run the server.
 	server.ListenAndServe(ctx)
