@@ -17,5 +17,9 @@
 # HomeKit accessory database
 db
 
+# HomeKit binary
+homekit-daikin-infrared
+
 # Sublime
 *.sublime-*
+
