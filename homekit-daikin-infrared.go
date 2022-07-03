@@ -14,12 +14,15 @@ import (
 	"syscall"
 )
 
-var developmentMode bool
 var currentHeaterCoolerState int
 var currentHeatingThresholdTemperature float64
+var developmentMode bool
+var dyson bool
+var name string
 
 func init() {
 	flag.BoolVar(&developmentMode, "dev", false, "development mode, so ignore LIRC setup")
+	flag.BoolVar(&dyson, "dyson", false, "Dyson AM09 mode")
 	flag.Parse()
 }
 
@@ -30,14 +33,25 @@ func main() {
 		panic(err)
 	}
 
-	// Create the Daikin heater accessory.
-	a := accessory.NewHeater(accessory.Info {
+	info := accessory.Info{
 		Name: "Daikin air conditioner",
 		SerialNumber: "FTXS50KAVMA",
 		Manufacturer: "Daikin",
 		Model: "FTXS50KAVMA",
 		Firmware: "1.0.0",
-	})
+	}
+	name = "daikin"
+
+	if dyson {
+		info.Name = "Dyson Hot+Cool"
+		info.SerialNumber = "AM09"
+		info.Manufacturer = "Dyson"
+		info.Model = "AM09"
+		name = "dyson-am09"
+	}
+
+	// Create the heater accessory.
+	a := accessory.NewHeater(info)
 
 	// TODO: read room temperature from a sensor
 	// a.Heater.CurrentTemperature.SetValue(19)
@@ -56,9 +70,9 @@ func main() {
 	a.Heater.Active.OnValueRemoteUpdate(func(on int) {
 		if on == 1 {
 			log.Println("Sending power on command")
-			powerOnCommand := "daikin POWER_ON"
+			powerOnCommand := fmt.Sprintf("%s POWER_ON", name)
 			if currentHeaterCoolerState == 1 {
-				powerOnCommand = "daikin POWER_ON_HEAT"
+				powerOnCommand = fmt.Sprintf("%s POWER_ON_HEAT", name)
 				currentHeatingThresholdTemperature = 25.0
 				a.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
 			}
@@ -68,7 +82,7 @@ func main() {
 			}
 		} else {
 			log.Println("Sending power off command")
-			err = ir.Send("daikin POWER_OFF")
+			err = ir.Send(fmt.Sprintf("%s POWER_OFF", name))
 			if err != nil {
 				log.Println(err)
 			}

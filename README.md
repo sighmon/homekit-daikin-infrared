@@ -53,7 +53,7 @@ If you install both the decoder and transmitter, the devices will appear:
 
 ## Decoding Daikin IR codes
 
-Find my collection of Daikin FTXS50KAVMA infrared codes in the [/codes](/codes) folder.
+Find my collection of Daikin FTXS50KAVMA infrared codes in the [/codes/daikin](/codes/daikin) folder.
 
 This was the process to create these text files:
 
@@ -125,7 +125,7 @@ The lengths seem to match these [reversed Daikin codes for a `ARC470A1` remote](
 
 ## Sending IR codes
 
-There's a sample LIRC config file: [/codes/daikin.lircd.conf](/codes/daikin.lircd.conf)
+There's a sample LIRC config file: [/codes/daikin/daikin.lircd.conf](/codes/daikin/daikin.lircd.conf)
 
 The `POWER_ON` command sets the heating/cooling mode `auto`, fan mode `auto`, temperature `23`.
 
@@ -133,7 +133,7 @@ There are individual temperature commands also with the mode `auto`, fan mode `a
 
 This avoids having to deal with generating a dynamic `.conf` file for now.
 
-* Copy it to the right location: `sudo cp daikin.lircd.conf /etc/lirc/lircd.conf.d/`
+* Copy it to the right location: `sudo cp codes/daikin/daikin.lircd.conf /etc/lirc/lircd.conf.d/`
 * Restart LIRCd: `sudo systemctl restart lircd`
 * Send your command: `irsend SEND_ONCE daikin POWER_ON`
 
