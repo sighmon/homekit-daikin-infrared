@@ -40,7 +40,7 @@ func main() {
 	})
 
 	// TODO: read room temperature from a sensor
-	a.Heater.CurrentTemperature.SetValue(19)
+	// a.Heater.CurrentTemperature.SetValue(19)
 
 	// Set target state to auto
 	currentHeaterCoolerState = 0
