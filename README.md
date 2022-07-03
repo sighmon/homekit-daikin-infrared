@@ -23,6 +23,13 @@ An Apple HomeKit accessory for an infrared Daikin FTXS50KAVMA reverse cycle air 
 | `12` GPIO18 | `s` |
 | `01` 3.3V | `middle` |
 
+| Raspberry Pi pin | DHT22 temperature sensor pin |
+| - | - |
+| `17` 3.3V | `1` VCC |
+| `07` GPIO4 | `2` Data |
+| `-` Not connected | `3` Not connected |
+| `20` Ground | `4` Ground |
+
 ## Software
 
 * Install `LIRC`: `sudo apt install lirc`
@@ -31,6 +38,18 @@ An Apple HomeKit accessory for an infrared Daikin FTXS50KAVMA reverse cycle air 
 * Build the HomeKit executable: `go build homekit-daikin-infrared.go`
 * Run the executable: `./homekit-daikin-infrared` or run the go file directly `go run homekit-daikin-infrared.go`
 * In the Home app on your iOS device, add a new accessory with the code: `00102003`
+
+### With a DHT22 temperature sensor
+
+**Notes**:
+
+* Building on macOS no longer works due to the [go-dht](https://github.com/d2r2/go-dht) library
+* After running on a Raspberry pi with `sudo` to access the DHT22 via GPIO the `./db` directory will be owned by the `root` user
+
+**Build and run**
+
+* Build on the Raspberry Pi: `go build homekit-daikin-infrared.go`
+* Run the executable: `sudo /usr/local/go/bin/go run homekit-daikin-infrared.go -temperaturePin 4`
 
 ### LIRC
 
@@ -147,7 +166,7 @@ Sending also works via the Go LIRC client: [/infrared-send/infrared-send.go](/in
 - [x] Decode IR codes for all of the functions we'd like to use
 - [x] Send those IR codes using the Go LIRC client
 - [x] Setup HAP Go library to send IR codes
-- [ ] Add a DHT22 temperature sensor to get the current temperature
+- [x] Add a DHT22 temperature sensor to get the current temperature
 - [ ] Write Go class to programmatically create and send IR codes
 - [ ] Setup GAP Go library to receive air conditioner commands
 
