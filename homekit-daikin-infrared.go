@@ -33,10 +33,11 @@ func readTemperature() {
 		for {
 			temperature, humidity, retried, err := dht.ReadDHTxxWithRetry(dht.DHT22, temperaturePin, false, 10)
 			if err != nil {
-				log.Fatal(err)
+				log.Println(fmt.Sprintf("Failed to get temperature with error: %s", err))
+			} else {
+				log.Println(fmt.Sprintf("Temperature = %f°C, Humidity = %f% (retried %d times)", temperature, humidity, retried))
+				acc.Heater.CurrentTemperature.SetValue(float64(temperature))
 			}
-			fmt.Println(fmt.Sprintf("Temperature = %f°C, Humidity = %f% (retried %d times)", temperature, humidity, retried))
-			acc.Heater.CurrentTemperature.SetValue(float64(temperature))
 			time.Sleep(5 * time.Second)
 		}
 	}
