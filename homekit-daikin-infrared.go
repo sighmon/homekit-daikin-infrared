@@ -145,7 +145,6 @@ func main() {
 	}()
 
 	// Read room temperature from a DHT22 temperature sensor
-	acc.Heater.CurrentTemperature.SetValue(19)
 	go readTemperature()
 
 	// Run the server.
