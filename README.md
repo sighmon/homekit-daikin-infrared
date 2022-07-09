@@ -148,7 +148,7 @@ Sending also works via the Go LIRC client: [/infrared-send/infrared-send.go](/in
 - [x] Send those IR codes using the Go LIRC client
 - [x] Setup HAP Go library to send IR codes
 - [x] Add a DHT22 temperature sensor to get the current temperature (see [add/1-dht22-temperature-sensor](https://github.com/sighmon/homekit-daikin-infrared/tree/add/1-dht22-temperature-sensor))
-- [ ] Write Go class to programmatically create and send IR codes
+- [ ] Write Go struct to programmatically create and send IR codes
 - [ ] Setup GAP Go library to receive air conditioner commands
 
 ## Useful links

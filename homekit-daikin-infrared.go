@@ -37,7 +37,7 @@ func init() {
 	ir = lircIr
 
 	// Store the data in the "./db" directory.
-	fs := hap.NewFsStore("./db")
+	fs = hap.NewFsStore("./db")
 
 	// Load the previous state, or create defaults
 	storedTemperature, err := fs.Get("currentHeatingThresholdTemperature")
@@ -91,8 +91,8 @@ func main() {
 	// Set target temperature
 	a.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
 	a.Heater.HeatingThresholdTemperature.SetStepValue(1.0)
-	a.Heater.HeatingThresholdTemperature.SetMinValue(18)
-	a.Heater.HeatingThresholdTemperature.SetMaxValue(26)
+	a.Heater.HeatingThresholdTemperature.SetMinValue(1)
+	a.Heater.HeatingThresholdTemperature.SetMaxValue(37)
 
 	a.Heater.Active.OnValueRemoteUpdate(func(on int) {
 		if on == 1 {
