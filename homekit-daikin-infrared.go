@@ -165,9 +165,18 @@ func main() {
 	RotationSpeed := characteristic.NewRotationSpeed()
 	RotationSpeed.SetStepValue(10)
 	RotationSpeed.OnValueRemoteUpdate(func(value float64) {
-		// TODO: Send fan speed command /10
+		percentageToSpeed := value / 10
+		if dyson {
+			command := fmt.Sprintf("%s FAN_DOWN", lircName)
+			if percentageToSpeed > currentFanSpeed {
+				command = fmt.Sprintf("%s FAN_UP", lircName)
+			}
+			for i := 1; float64(i) <= math.Abs(percentageToSpeed - currentFanSpeed); i++ {
+				sendLircCommand(command)
+			}
+		}
 		log.Println(fmt.Sprintf("Sending %s target fan speed command: %f%", lircName, value))
-		currentFanSpeed = value
+		currentFanSpeed = percentageToSpeed
 	})
 	a.Heater.AddC(RotationSpeed.C)
 
