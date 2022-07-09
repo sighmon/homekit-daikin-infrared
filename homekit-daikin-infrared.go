@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/brutella/hap"
 	"github.com/brutella/hap/accessory"
+	"github.com/brutella/hap/characteristic"
 	"github.com/chbmuc/lirc"
 
 	"context"
@@ -16,6 +17,7 @@ import (
 	"syscall"
 )
 
+var currentFanSpeed float64
 var currentHeaterCoolerState int
 var currentHeatingThresholdTemperature float64
 var developmentMode bool
@@ -53,6 +55,13 @@ func init() {
 		storedHeaterState = []byte("0")
 	}
 	currentHeaterCoolerState, _ = strconv.Atoi(string(storedHeaterState))
+	storedFanSpeed, err := fs.Get("currentFanSpeed")
+	if err != nil {
+		fs.Set("currentFanSpeed", []byte("5"))
+		storedFanSpeed = []byte("5")
+	}
+	storedFanSpeedInt, _ := strconv.Atoi(string(storedFanSpeed))
+	currentFanSpeed = float64(storedFanSpeedInt)
 }
 
 func sendLircCommand(command string) {
@@ -91,8 +100,12 @@ func main() {
 	// Set target temperature
 	a.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
 	a.Heater.HeatingThresholdTemperature.SetStepValue(1.0)
-	a.Heater.HeatingThresholdTemperature.SetMinValue(1)
-	a.Heater.HeatingThresholdTemperature.SetMaxValue(37)
+	a.Heater.HeatingThresholdTemperature.SetMinValue(18)
+	a.Heater.HeatingThresholdTemperature.SetMaxValue(26)
+	if dyson {
+		a.Heater.HeatingThresholdTemperature.SetMinValue(1)
+		a.Heater.HeatingThresholdTemperature.SetMaxValue(37)
+	}
 
 	a.Heater.Active.OnValueRemoteUpdate(func(on int) {
 		if on == 1 {
@@ -147,6 +160,16 @@ func main() {
 		log.Println(fmt.Sprintf("Sending %s target mode command: %f°C %s", lircName, value, state))
 		currentHeaterCoolerState = value
 	})
+
+	// Add Fan speed control
+	RotationSpeed := characteristic.NewRotationSpeed()
+	RotationSpeed.SetStepValue(10)
+	RotationSpeed.OnValueRemoteUpdate(func(value float64) {
+		// TODO: Send fan speed command /10
+		log.Println(fmt.Sprintf("Sending %s target fan speed command: %f%", lircName, value))
+		currentFanSpeed = value
+	})
+	a.Heater.AddC(RotationSpeed.C)
 
 	// Create the hap server.
 	server, err := hap.NewServer(fs, a.A)
