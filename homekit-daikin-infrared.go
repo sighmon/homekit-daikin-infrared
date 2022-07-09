@@ -164,6 +164,7 @@ func main() {
 	// Add Fan speed control
 	RotationSpeed := characteristic.NewRotationSpeed()
 	RotationSpeed.SetStepValue(10)
+	RotationSpeed.SetValue(currentFanSpeed * 10)
 	RotationSpeed.OnValueRemoteUpdate(func(value float64) {
 		percentageToSpeed := value / 10
 		if dyson {
