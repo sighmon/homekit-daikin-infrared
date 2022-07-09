@@ -9,8 +9,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 )
 
@@ -18,21 +20,49 @@ var currentHeaterCoolerState int
 var currentHeatingThresholdTemperature float64
 var developmentMode bool
 var dyson bool
-var name string
+var fs hap.Store
+var ir *lirc.Router
+var lircName string
 
 func init() {
 	flag.BoolVar(&developmentMode, "dev", false, "development mode, so ignore LIRC setup")
 	flag.BoolVar(&dyson, "dyson", false, "Dyson AM09 mode")
 	flag.Parse()
-}
 
-func main() {
 	// Initialize with path to lirc socket
-	ir, err := lirc.Init("/var/run/lirc/lircd")
+	lircIr, err := lirc.Init("/var/run/lirc/lircd")
 	if err != nil && developmentMode == false {
 		panic(err)
 	}
+	ir = lircIr
 
+	// Store the data in the "./db" directory.
+	fs := hap.NewFsStore("./db")
+
+	// Load the previous state, or create defaults
+	storedTemperature, err := fs.Get("currentHeatingThresholdTemperature")
+	if err != nil {
+		fs.Set("currentHeatingThresholdTemperature", []byte("23"))
+		storedTemperature = []byte("23")
+	}
+	storedTemperatureInt, _ := strconv.Atoi(string(storedTemperature))
+	currentHeatingThresholdTemperature = float64(storedTemperatureInt)
+	storedHeaterState, err := fs.Get("currentHeaterCoolerState")
+	if err != nil {
+		fs.Set("currentHeaterCoolerState", []byte("0"))
+		storedHeaterState = []byte("0")
+	}
+	currentHeaterCoolerState, _ = strconv.Atoi(string(storedHeaterState))
+}
+
+func sendLircCommand(command string) {
+	err := ir.Send(command)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func main() {
 	info := accessory.Info{
 		Name: "Daikin air conditioner",
 		SerialNumber: "FTXS50KAVMA",
@@ -40,14 +70,14 @@ func main() {
 		Model: "FTXS50KAVMA",
 		Firmware: "1.0.0",
 	}
-	name = "daikin"
+	lircName = "daikin"
 
 	if dyson {
 		info.Name = "Dyson Hot+Cool"
 		info.SerialNumber = "AM09"
 		info.Manufacturer = "Dyson"
 		info.Model = "AM09"
-		name = "dyson-am09"
+		lircName = "dyson-am09"
 	}
 
 	// Create the heater accessory.
@@ -56,12 +86,9 @@ func main() {
 	// TODO: read room temperature from a sensor
 	// a.Heater.CurrentTemperature.SetValue(19)
 
-	// Set target state to auto
-	currentHeaterCoolerState = 0
 	a.Heater.TargetHeaterCoolerState.SetValue(currentHeaterCoolerState)
 
 	// Set target temperature
-	currentHeatingThresholdTemperature = 23.0
 	a.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
 	a.Heater.HeatingThresholdTemperature.SetStepValue(1.0)
 	a.Heater.HeatingThresholdTemperature.SetMinValue(18)
@@ -70,53 +97,56 @@ func main() {
 	a.Heater.Active.OnValueRemoteUpdate(func(on int) {
 		if on == 1 {
 			log.Println("Sending power on command")
-			powerOnCommand := fmt.Sprintf("%s POWER_ON", name)
-			if currentHeaterCoolerState == 1 {
-				powerOnCommand = fmt.Sprintf("%s POWER_ON_HEAT", name)
+			powerOnCommand := fmt.Sprintf("%s POWER_ON", lircName)
+			if currentHeaterCoolerState == 1 && dyson == false {
+				powerOnCommand = fmt.Sprintf("%s POWER_ON_HEAT", lircName)
 				currentHeatingThresholdTemperature = 25.0
 				a.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
 			}
-			err = ir.Send(powerOnCommand)
-			if err != nil {
-				log.Println(err)
-			}
+			sendLircCommand(powerOnCommand)
 		} else {
 			log.Println("Sending power off command")
-			err = ir.Send(fmt.Sprintf("%s POWER_OFF", name))
-			if err != nil {
-				log.Println(err)
-			}
+			sendLircCommand(fmt.Sprintf("%s POWER_OFF", lircName))
 		}
 	})
 
 	a.Heater.HeatingThresholdTemperature.OnValueRemoteUpdate(func(value float64) {
-		currentHeatingThresholdTemperature = value
 		state := "AUTO"
 		if currentHeaterCoolerState == 1 {
 			state = "HEAT"
 		}
-		log.Println(fmt.Sprintf("Sending target temperature command: %f°C %s", currentHeatingThresholdTemperature, state))
-		err = ir.Send(fmt.Sprintf("daikin TEMPERATURE_%s_%d", state, int(currentHeatingThresholdTemperature)))
-		if err != nil {
-			log.Println(err)
+		if dyson {
+			command := fmt.Sprintf("%s HEAT_DOWN", lircName)
+			if value > currentHeatingThresholdTemperature {
+				command = fmt.Sprintf("%s HEAT_UP", lircName)
+			}
+			for i := 1; float64(i) <= math.Abs(value - currentHeatingThresholdTemperature); i++ {
+				sendLircCommand(command)
+			}
+		} else {
+			sendLircCommand(fmt.Sprintf("daikin TEMPERATURE_%s_%d", state, int(value)))
 		}
+		log.Println(fmt.Sprintf("Sending %s target temperature command: %f°C %s", lircName, value, state))
+		currentHeatingThresholdTemperature = value
 	})
 
 	a.Heater.TargetHeaterCoolerState.OnValueRemoteUpdate(func(value int) {
-		currentHeaterCoolerState = value
 		state := "AUTO"
-		if currentHeaterCoolerState == 1 {
+		if value == 1 {
 			state = "HEAT"
 		}
-		log.Println(fmt.Sprintf("Sending target mode command: %f°C %s", currentHeatingThresholdTemperature, state))
-		err = ir.Send(fmt.Sprintf("daikin TEMPERATURE_%s_%d", state, int(currentHeatingThresholdTemperature)))
-		if err != nil {
-			log.Println(err)
+		if dyson {
+			if value == 1 {
+				sendLircCommand(fmt.Sprintf("%s HEAT_UP", lircName))
+			} else {
+				sendLircCommand(fmt.Sprintf("%s MODE_FAN", lircName))
+			}
+		} else {
+			sendLircCommand(fmt.Sprintf("daikin TEMPERATURE_%s_%d", state, int(value)))
 		}
+		log.Println(fmt.Sprintf("Sending %s target mode command: %f°C %s", lircName, value, state))
+		currentHeaterCoolerState = value
 	})
-
-	// Store the data in the "./db" directory.
-	fs := hap.NewFsStore("./db")
 
 	// Create the hap server.
 	server, err := hap.NewServer(fs, a.A)
