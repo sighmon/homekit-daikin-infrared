@@ -182,11 +182,14 @@ func main() {
 			if percentageToSpeed > currentFanSpeed {
 				command = fmt.Sprintf("%s FAN_UP", lircName)
 			}
-			for i := 1; float64(i) <= math.Abs(percentageToSpeed - currentFanSpeed); i++ {
+			speedDifference := int(math.Abs(percentageToSpeed - currentFanSpeed))
+			log.Println(fmt.Sprintf("Speed difference: %d", speedDifference))
+			for i := 0; i < speedDifference; i++ {
+				log.Println(fmt.Sprintf("Sending %s", command))
 				sendLircCommand(command)
 			}
 		}
-		log.Println(fmt.Sprintf("Sending %s target fan speed command: %f%", lircName, value))
+		log.Println(fmt.Sprintf("Sending %s target fan speed command: %f%%", lircName, value))
 		currentFanSpeed = percentageToSpeed
 		fs.Set("currentFanSpeed", []byte(fmt.Sprintf("%d", int(currentFanSpeed))))
 	})
