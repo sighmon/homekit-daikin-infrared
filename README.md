@@ -1,4 +1,4 @@
-# HomeKit Daikin infrared accessory
+# HomeKit Daikin/Dyson infrared accessory
 
 An Apple HomeKit accessory for an infrared remote controller.
 
@@ -13,6 +13,14 @@ Currently supporting:
 
 * Duinotech infrared receiver XC-4427 ([Jaycar](https://www.jaycar.com.au/arduino-compatible-infrared-receiver-module/p/XC4427))
 * Duinotech infrared transmitter XC-4426 ([Jaycar](https://www.jaycar.com.au/arduino-compatible-infrared-transmitter-module/p/XC4426))
+
+### Optional temperature sensor
+
+If you'd like to get feedback in the Apple Home app of the current room temperature, add a DHT22 sensor.
+
+* DHT22 temperature/humidity sensor ([Core Electronics](https://core-electronics.com.au/dht22-temperature-and-relative-humidity-sensor-module.html))
+
+**Note**: for wiring and software of the DHT22, see this branch: [add/1-dht22-temperature-sensor](https://github.com/sighmon/homekit-daikin-infrared/tree/add/1-dht22-temperature-sensor)
 
 ### Wiring
 
