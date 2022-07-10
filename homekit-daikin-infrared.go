@@ -137,7 +137,7 @@ func main() {
 			}
 			a.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
 			a.Heater.TargetHeaterCoolerState.SetValue(currentHeaterCoolerState)
-			fanSpeed.SetValue(currentFanSpeed * 10)
+			fanSpeed.SetValue(currentFanSpeed)
 			swingMode.SetValue(currentSwingMode)
 			sendLircCommand(powerOnCommand)
 		} else {
@@ -191,7 +191,7 @@ func main() {
 	// Add Fan speed control
 	fanSpeed = characteristic.NewRotationSpeed()
 	fanSpeed.SetStepValue(10)
-	fanSpeed.SetValue(currentFanSpeed * 10)
+	fanSpeed.SetValue(currentFanSpeed)
 	fanSpeed.OnValueRemoteUpdate(func(value float64) {
 		percentageToSpeed := value / 10
 		if dyson {
