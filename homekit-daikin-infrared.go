@@ -183,9 +183,9 @@ func main() {
 				command = fmt.Sprintf("%s FAN_UP", lircName)
 			}
 			speedDifference := int(math.Abs(percentageToSpeed - currentFanSpeed))
-			log.Println(fmt.Sprintf("Speed difference: %d", speedDifference))
+			// Add 1 as the first fan speed command just shows the current speed on the display
+			speedDifference += 1
 			for i := 0; i < speedDifference; i++ {
-				log.Println(fmt.Sprintf("Sending %s", command))
 				sendLircCommand(command)
 			}
 		}
