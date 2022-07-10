@@ -33,12 +33,6 @@ var fanSpeed *characteristic.RotationSpeed
 var swingMode *characteristic.SwingMode
 var temperaturePin int
 
-func init() {
-	flag.BoolVar(&developmentMode, "dev", false, "development mode, so ignore LIRC setup")
-	flag.BoolVar(&dyson, "dyson", false, "Dyson AM09 mode")
-	flag.IntVar(&temperaturePin, "temperaturePin", 0, "tempearture sensor GPIO pin, an int")
-	flag.Parse()
-
 func readTemperature() {
 	if temperaturePin != 0 {
 		for {
@@ -55,6 +49,11 @@ func readTemperature() {
 }
 
 func init() {
+	flag.BoolVar(&developmentMode, "dev", false, "development mode, so ignore LIRC setup")
+	flag.BoolVar(&dyson, "dyson", false, "Dyson AM09 mode")
+	flag.IntVar(&temperaturePin, "temperaturePin", 0, "tempearture sensor GPIO pin, an int")
+	flag.Parse()
+
 	// Initialize with path to lirc socket
 	lircIr, err := lirc.Init("/var/run/lirc/lircd")
 	if err != nil && developmentMode == false {
