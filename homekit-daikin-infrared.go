@@ -205,6 +205,8 @@ func main() {
 			for i := 0; i < speedDifference; i++ {
 				sendLircCommand(command)
 			}
+		} else {
+			// TODO: Daikin fan speed
 		}
 		log.Println(fmt.Sprintf("Sending %s target fan speed command: %f%%", lircName, value))
 		currentFanSpeed = percentageToSpeed

@@ -1,6 +1,11 @@
 # HomeKit Daikin infrared accessory
 
-An Apple HomeKit accessory for an infrared Daikin FTXS50KAVMA reverse cycle air conditioner remote control.
+An Apple HomeKit accessory for an infrared remote controller.
+
+Currently supporting:
+
+* Daikin FTXS50KAVMA reverse cycle air conditioner
+* Dyson Hot + Cool AM09 fan heater
 
 ![The accessory added to iOS](images/homekit-daikin-infrared.jpg)
 
@@ -31,6 +36,7 @@ An Apple HomeKit accessory for an infrared Daikin FTXS50KAVMA reverse cycle air 
 * Build the HomeKit executable: `go build homekit-daikin-infrared.go`
 * Run the executable: `./homekit-daikin-infrared` or run the go file directly `go run homekit-daikin-infrared.go`
 * In the Home app on your iOS device, add a new accessory with the code: `00102003`
+* To control a Dyson Hot + Cool AM09 fan heater, run with the `-dyson` flag: `go run homekit-daikin-infrared.go -dyson`
 
 ### LIRC
 
