@@ -174,11 +174,11 @@ func main() {
 	// Add Fan speed control
 	fanSpeed = characteristic.NewRotationSpeed()
 	fanSpeed.SetStepValue(1)
-	fanSpeed.SetMinValue(1)
+	fanSpeed.SetMinValue(0)
 	fanSpeed.SetMaxValue(10)
 	fanSpeed.SetValue(currentFanSpeed)
 	fanSpeed.OnValueRemoteUpdate(func(value float64) {
-		percentageToSpeed := value
+		percentageToSpeed := value / 10
 		if dyson {
 			command := fmt.Sprintf("%s FAN_DOWN", lircName)
 			if percentageToSpeed > currentFanSpeed {
