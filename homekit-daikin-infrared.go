@@ -25,6 +25,7 @@ var dyson bool
 var fs hap.Store
 var ir *lirc.Router
 var lircName string
+var fanSpeed *characteristic.RotationSpeed
 
 func init() {
 	flag.BoolVar(&developmentMode, "dev", false, "development mode, so ignore LIRC setup")
@@ -114,8 +115,10 @@ func main() {
 			if currentHeaterCoolerState == 1 && dyson == false {
 				powerOnCommand = fmt.Sprintf("%s POWER_ON_HEAT", lircName)
 				currentHeatingThresholdTemperature = 25.0
-				a.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
 			}
+			a.Heater.HeatingThresholdTemperature.SetValue(currentHeatingThresholdTemperature)
+			a.Heater.TargetHeaterCoolerState.SetValue(currentHeaterCoolerState)
+			fanSpeed.SetValue(currentFanSpeed * 10)
 			sendLircCommand(powerOnCommand)
 		} else {
 			log.Println("Sending power off command")
@@ -162,10 +165,10 @@ func main() {
 	})
 
 	// Add Fan speed control
-	RotationSpeed := characteristic.NewRotationSpeed()
-	RotationSpeed.SetStepValue(10)
-	RotationSpeed.SetValue(currentFanSpeed * 10)
-	RotationSpeed.OnValueRemoteUpdate(func(value float64) {
+	fanSpeed = characteristic.NewRotationSpeed()
+	fanSpeed.SetStepValue(10)
+	fanSpeed.SetValue(currentFanSpeed * 10)
+	fanSpeed.OnValueRemoteUpdate(func(value float64) {
 		percentageToSpeed := value / 10
 		if dyson {
 			command := fmt.Sprintf("%s FAN_DOWN", lircName)
@@ -179,7 +182,7 @@ func main() {
 		log.Println(fmt.Sprintf("Sending %s target fan speed command: %f%", lircName, value))
 		currentFanSpeed = percentageToSpeed
 	})
-	a.Heater.AddC(RotationSpeed.C)
+	a.Heater.AddC(fanSpeed.C)
 
 	// Create the hap server.
 	server, err := hap.NewServer(fs, a.A)
