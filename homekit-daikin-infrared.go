@@ -227,6 +227,7 @@ func main() {
 		currentSwingMode = value
 		fs.Set("currentSwingMode", []byte(fmt.Sprintf("%d", currentSwingMode)))
 	})
+	a.Heater.AddC(swingMode.C)
 
 	// Create the hap server.
 	server, err := hap.NewServer(fs, a.A)
