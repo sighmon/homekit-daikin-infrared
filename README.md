@@ -1,6 +1,11 @@
 # HomeKit Daikin infrared accessory
 
-An Apple HomeKit accessory for an infrared Daikin FTXS50KAVMA reverse cycle air conditioner remote control.
+An Apple HomeKit accessory for an infrared remote controller.
+
+Currently supporting:
+
+* Daikin FTXS50KAVMA reverse cycle air conditioner
+* Dyson Hot + Cool AM09 fan heater
 
 ![The accessory added to iOS](images/homekit-daikin-infrared.jpg)
 
@@ -38,6 +43,7 @@ An Apple HomeKit accessory for an infrared Daikin FTXS50KAVMA reverse cycle air 
 * Build the HomeKit executable: `go build homekit-daikin-infrared.go`
 * Run the executable: `./homekit-daikin-infrared` or run the go file directly `go run homekit-daikin-infrared.go`
 * In the Home app on your iOS device, add a new accessory with the code: `00102003`
+* To control a Dyson Hot + Cool AM09 fan heater, run with the `-dyson` flag: `go run homekit-daikin-infrared.go -dyson`
 
 ### With a DHT22 temperature sensor
 
@@ -72,7 +78,7 @@ If you install both the decoder and transmitter, the devices will appear:
 
 ## Decoding Daikin IR codes
 
-Find my collection of Daikin FTXS50KAVMA infrared codes in the [/codes](/codes) folder.
+Find my collection of Daikin FTXS50KAVMA infrared codes in the [/codes/daikin](/codes/daikin) folder.
 
 This was the process to create these text files:
 
@@ -144,7 +150,7 @@ The lengths seem to match these [reversed Daikin codes for a `ARC470A1` remote](
 
 ## Sending IR codes
 
-There's a sample LIRC config file: [/codes/daikin.lircd.conf](/codes/daikin.lircd.conf)
+There's a sample LIRC config file: [/codes/daikin/daikin.lircd.conf](/codes/daikin/daikin.lircd.conf)
 
 The `POWER_ON` command sets the heating/cooling mode `auto`, fan mode `auto`, temperature `23`.
 
@@ -152,7 +158,7 @@ There are individual temperature commands also with the mode `auto`, fan mode `a
 
 This avoids having to deal with generating a dynamic `.conf` file for now.
 
-* Copy it to the right location: `sudo cp daikin.lircd.conf /etc/lirc/lircd.conf.d/`
+* Copy it to the right location: `sudo cp codes/daikin/daikin.lircd.conf /etc/lirc/lircd.conf.d/`
 * Restart LIRCd: `sudo systemctl restart lircd`
 * Send your command: `irsend SEND_ONCE daikin POWER_ON`
 
@@ -167,7 +173,7 @@ Sending also works via the Go LIRC client: [/infrared-send/infrared-send.go](/in
 - [x] Send those IR codes using the Go LIRC client
 - [x] Setup HAP Go library to send IR codes
 - [x] Add a DHT22 temperature sensor to get the current temperature (see [add/1-dht22-temperature-sensor](https://github.com/sighmon/homekit-daikin-infrared/tree/add/1-dht22-temperature-sensor))
-- [ ] Write Go class to programmatically create and send IR codes
+- [ ] Write Go struct to programmatically create and send IR codes
 - [ ] Setup GAP Go library to receive air conditioner commands
 
 ## Useful links
