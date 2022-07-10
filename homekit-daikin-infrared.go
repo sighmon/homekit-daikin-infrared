@@ -100,7 +100,14 @@ func main() {
 		lircName = "dyson-am09"
 	}
 
-	log.Println(fmt.Sprintf("Starting up %s, state: %d, temperature: %f, fan: %f", lircName, currentHeaterCoolerState, currentHeatingThresholdTemperature, currentFanSpeed))
+	log.Println(fmt.Sprintf(
+		"Starting up %s, state: %d, temperature: %f, fan: %f, swing mode: %d",
+		lircName,
+		currentHeaterCoolerState,
+		currentHeatingThresholdTemperature,
+		currentFanSpeed,
+		currentSwingMode,
+	))
 
 	// Create the heater accessory.
 	a := accessory.NewHeater(info)
