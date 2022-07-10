@@ -59,8 +59,8 @@ func init() {
 	currentHeaterCoolerState = storedHeaterCoolerStateInt
 	storedFanSpeed, err := fs.Get("currentFanSpeed")
 	if err != nil {
-		fs.Set("currentFanSpeed", []byte("5"))
-		storedFanSpeed = []byte("5")
+		fs.Set("currentFanSpeed", []byte("50"))
+		storedFanSpeed = []byte("50")
 	}
 	storedFanSpeedInt, _ := strconv.Atoi(string(storedFanSpeed))
 	currentFanSpeed = float64(storedFanSpeedInt)
@@ -173,24 +173,21 @@ func main() {
 
 	// Add Fan speed control
 	fanSpeed = characteristic.NewRotationSpeed()
-	fanSpeed.SetStepValue(1)
-	fanSpeed.SetMinValue(0)
-	fanSpeed.SetMaxValue(10)
+	fanSpeed.SetStepValue(10)
 	fanSpeed.SetValue(currentFanSpeed)
 	fanSpeed.OnValueRemoteUpdate(func(value float64) {
-		percentageToSpeed := value / 10
 		if dyson {
 			command := fmt.Sprintf("%s FAN_DOWN", lircName)
-			if percentageToSpeed > currentFanSpeed {
+			if value > currentFanSpeed {
 				command = fmt.Sprintf("%s FAN_UP", lircName)
 			}
-			for i := 1; float64(i) <= math.Abs(percentageToSpeed - currentFanSpeed); i++ {
+			for i := 1; float64(i) <= math.Abs(value - currentFanSpeed); i++ {
 				sendLircCommand(command)
 			}
 		}
 		log.Println(fmt.Sprintf("Sending %s target fan speed command: %f%", lircName, value))
-		currentFanSpeed = percentageToSpeed
-		fs.Set("currentFanSpeed", []byte(fmt.Sprintf("%d", int(currentFanSpeed))))
+		currentFanSpeed = value
+		fs.Set("currentFanSpeed", []byte(fmt.Sprintf("%d", int(value))))
 	})
 	a.Heater.AddC(fanSpeed.C)
 
