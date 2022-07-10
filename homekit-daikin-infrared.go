@@ -55,7 +55,8 @@ func init() {
 		fs.Set("currentHeaterCoolerState", []byte("0"))
 		storedHeaterState = []byte("0")
 	}
-	currentHeaterCoolerState, _ = strconv.Atoi(string(storedHeaterState))
+	storedHeaterCoolerStateInt, _ := strconv.Atoi(string(storedHeaterState))
+	currentHeaterCoolerState = storedHeaterCoolerStateInt
 	storedFanSpeed, err := fs.Get("currentFanSpeed")
 	if err != nil {
 		fs.Set("currentFanSpeed", []byte("5"))
@@ -146,6 +147,7 @@ func main() {
 		}
 		log.Println(fmt.Sprintf("Sending %s target temperature command: %f°C %s", lircName, value, state))
 		currentHeatingThresholdTemperature = value
+		fs.Set("currentHeatingThresholdTemperature", []byte(fmt.Sprintf("%d", int(currentHeatingThresholdTemperature))))
 	})
 
 	a.Heater.TargetHeaterCoolerState.OnValueRemoteUpdate(func(value int) {
@@ -166,6 +168,7 @@ func main() {
 		}
 		log.Println(fmt.Sprintf("Sending %s target mode command: %f°C %s", lircName, currentHeatingThresholdTemperature, state))
 		currentHeaterCoolerState = value
+		fs.Set("currentHeaterCoolerState", []byte(fmt.Sprintf("%d", currentHeaterCoolerState)))
 	})
 
 	// Add Fan speed control
@@ -185,6 +188,7 @@ func main() {
 		}
 		log.Println(fmt.Sprintf("Sending %s target fan speed command: %f%", lircName, value))
 		currentFanSpeed = percentageToSpeed
+		fs.Set("currentFanSpeed", []byte(fmt.Sprintf("%d", int(currentFanSpeed))))
 	})
 	a.Heater.AddC(fanSpeed.C)
 
