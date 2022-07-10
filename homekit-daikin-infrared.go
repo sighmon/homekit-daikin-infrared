@@ -90,6 +90,8 @@ func main() {
 		lircName = "dyson-am09"
 	}
 
+	log.Println(fmt.Sprintf("Starting up %s, state: %d, temperature: %f, fan: %f", lircName, currentHeaterCoolerState, currentHeatingThresholdTemperature, currentFanSpeed))
+
 	// Create the heater accessory.
 	a := accessory.NewHeater(info)
 
@@ -152,15 +154,17 @@ func main() {
 			state = "HEAT"
 		}
 		if dyson {
-			if value == 1 {
-				sendLircCommand(fmt.Sprintf("%s HEAT_UP", lircName))
-			} else {
-				sendLircCommand(fmt.Sprintf("%s MODE_FAN", lircName))
+			if currentHeaterCoolerState != value {
+				if value == 1 {
+					sendLircCommand(fmt.Sprintf("%s HEAT_UP", lircName))
+				} else {
+					sendLircCommand(fmt.Sprintf("%s MODE_FAN", lircName))
+				}
 			}
 		} else {
 			sendLircCommand(fmt.Sprintf("daikin TEMPERATURE_%s_%d", state, int(value)))
 		}
-		log.Println(fmt.Sprintf("Sending %s target mode command: %f°C %s", lircName, value, state))
+		log.Println(fmt.Sprintf("Sending %s target mode command: %f°C %s", lircName, currentHeatingThresholdTemperature, state))
 		currentHeaterCoolerState = value
 	})
 
