@@ -42,6 +42,11 @@ func readTemperature() {
 			} else {
 				log.Println(fmt.Sprintf("Temperature = %f°C, Humidity = %f% (retried %d times)", temperature, humidity, retried))
 				acc.Heater.CurrentTemperature.SetValue(float64(temperature))
+				if acc.Heater.CurrentTemperature.Value() < currentHeatingThresholdTemperature {
+					a.Heater.Active.SetValue(1)
+				} else {
+					a.Heater.Active.SetValue(0)
+				}
 			}
 			time.Sleep(5 * time.Second)
 		}
