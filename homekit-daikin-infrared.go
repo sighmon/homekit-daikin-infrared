@@ -116,9 +116,9 @@ func main() {
 	// a.Heater.CurrentTemperature.SetValue(19)
 
 	if a.Heater.CurrentTemperature.Value() < currentHeatingThresholdTemperature {
-		a.Heater.Active.SetValue(1)
+		a.Heater.CurrentHeaterCoolerState.SetValue(2)
 	} else {
-		a.Heater.Active.SetValue(0)
+		a.Heater.CurrentHeaterCoolerState.SetValue(1)
 	}
 
 	a.Heater.TargetHeaterCoolerState.SetValue(currentHeaterCoolerState)
