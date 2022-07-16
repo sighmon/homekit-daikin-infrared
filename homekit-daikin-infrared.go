@@ -115,6 +115,12 @@ func main() {
 	// TODO: read room temperature from a sensor
 	// a.Heater.CurrentTemperature.SetValue(19)
 
+	if a.Heater.CurrentTemperature.Value() < currentHeatingThresholdTemperature {
+		a.Heater.Active.SetValue(1)
+	} else {
+		a.Heater.Active.SetValue(0)
+	}
+
 	a.Heater.TargetHeaterCoolerState.SetValue(currentHeaterCoolerState)
 
 	// Set target temperature
